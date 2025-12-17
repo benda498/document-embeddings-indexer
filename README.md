@@ -1,108 +1,54 @@
 # Document Embeddings Indexer
 
-A Python script that processes PDF and DOCX files, splits them into sentences, generates embeddings using Google's Gemini API, and stores everything in PostgreSQL.
-
-## What it does
-
-1. Takes a PDF or DOCX file
-2. Extracts all the text
-3. Splits it into sentences (each sentence becomes a chunk)
-4. Creates embeddings for each sentence using Gemini
-5. Saves everything to PostgreSQL
+Python script that takes PDF/DOCX files, splits them into sentences, generates embeddings via Google Gemini API, and stores everything in PostgreSQL.
 
 ## Setup
 
-### Prerequisites
-
+**Requirements:**
 - Python 3.8+
 - PostgreSQL with pgvector extension
 - Google Gemini API key
 
-### Install PostgreSQL pgvector
-
-First, you need to install the pgvector extension in your PostgreSQL database:
-
-```sql
-CREATE EXTENSION vector;
-```
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
-
+**Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file (copy from `.env.example`):
-
-```bash
-cp .env.example .env
+**Configure environment:**
+1. Copy `.env.example` to `.env`
+2. Get your Gemini API key from https://makersuite.google.com/app/apikey
+3. Add your PostgreSQL connection string
+4. Make sure pgvector extension is enabled in your database:
+```sql
+CREATE EXTENSION vector;
 ```
-
-4. Edit `.env` and add your credentials:
-   - `GEMINI_API_KEY` - Get it from [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - `POSTGRES_URL` - Your PostgreSQL connection string
 
 ## Usage
 
-Basic usage:
-
 ```bash
-python index_documents.py path/to/your/file.pdf
+python index_documents.py document.pdf
 ```
 
-The script uses sentence-based chunking:
-- Each sentence becomes a separate chunk
-- Splits on periods (.), exclamation marks (!), and question marks (?)
-- Preserves complete sentences, so each chunk has full meaning
-
-This approach is simple and ensures each chunk contains a complete thought.
-
-## Examples
-
-Process a PDF:
-```bash
-python index_documents.py research_paper.pdf
-```
-
-Process a Word document:
-```bash
-python index_documents.py report.docx
-```
+The script will:
+1. Extract text from the file
+2. Split into sentences
+3. Generate 768-dimensional embeddings for each sentence
+4. Save to PostgreSQL
 
 ## Database Schema
 
-The script creates a table called `document_embeddings` with this structure:
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | SERIAL | Primary key |
-| chunk_text | TEXT | The sentence |
-| embedding | vector(768) | The embedding vector |
-| filename | VARCHAR(255) | Original filename |
-| split_strategy | VARCHAR(50) | Always "sentence_based" |
-| created_at | TIMESTAMP | When it was added |
+```sql
+CREATE TABLE document_embeddings (
+    id SERIAL PRIMARY KEY,
+    chunk_text TEXT NOT NULL,
+    embedding vector(768),
+    filename VARCHAR(255),
+    split_strategy VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ## Notes
 
-- Embeddings are 768-dimensional vectors (Gemini's embedding-001 model)
-- The script shows progress as it processes sentences
-- Each sentence is treated as a complete semantic unit
-- Works best with well-structured documents
+Works with PDF and DOCX files only. Each sentence is treated as a separate chunk using sentence-based splitting strategy.
 
-## Troubleshooting
-
-**"Could not connect to database"**
-- Make sure PostgreSQL is running
-- Check your connection string in `.env`
-- Verify the database exists
-
-**"API key not valid"**
-- Double-check your Gemini API key
-- Make sure there are no extra spaces in `.env`
-
-**"Unsupported file format"**
-- Only PDF and DOCX files are supported
-- Check the file extension
