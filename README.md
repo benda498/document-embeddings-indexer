@@ -15,10 +15,18 @@ pip install -r requirements.txt
 ```
 
 **Configure environment:**
-1. Copy `.env.example` to `.env`
-2. Get your Gemini API key from https://makersuite.google.com/app/apikey
-3. Add your PostgreSQL connection string
-4. Make sure pgvector extension is enabled in your database:
+
+Create a `.env` file in the project directory with the following structure:
+
+```
+GEMINI_API_KEY=your_gemini_api_key_here
+POSTGRES_URL=postgresql://user:password@host:5432/database
+```
+
+- Get your Gemini API key from https://makersuite.google.com/app/apikey
+- PostgreSQL connection string format: `postgresql://username:password@host:port/database_name`
+- Make sure pgvector extension is enabled in your database:
+
 ```sql
 CREATE EXTENSION vector;
 ```
