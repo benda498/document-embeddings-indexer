@@ -11,7 +11,12 @@ Python script that takes PDF/DOCX files, splits them into sentences, generates e
 
 **Install dependencies:**
 ```bash
-pip install -r requirements.txt
+pip install python-dotenv
+pip install psycopg2-binary
+pip install google-generativeai
+pip install PyPDF2
+pip install python-docx
+pip install pgvector
 ```
 
 **Configure environment:**
